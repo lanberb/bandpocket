@@ -1,0 +1,23 @@
+{
+  "name": "bandpocket",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/dotenv": "^1.4.1",
+    "core-js": "^3.8.3",
+    "firebase": "^8.3.0",
+    "nuxt": "^2.14.12",
+    "nuxt-webfontloader": "^1.1.0"
+  },
+  "devDependencies": {
+    "fibers": "^5.0.0",
+    "sass": "^1.32.8",
+    "sass-loader": "^10.1.1"
+  }
+}
