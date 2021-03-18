@@ -123,9 +123,6 @@ export default {
             ob.date = this.date;
             ob.room = this.room;
             console.log(ob);
-            // あと予約機能つければひとまず終わり！！！！！！！！！！！！！お疲れ！！！！！！！！！！！！！！！！！！！！
-            // お前の人生を頑張れるのはお前しかいない！！！！！！！！！！！！！！！頑張れ！！！！！！！！！！！！！！！！！！！！！！！！
-            // 歯医者行ったらなんか飯食いに行って学校行ってアプリの自慢するとかいいんじゃね？
         },
         reloadTable: async function(n, room) {
             if (!!room) this.room = room;
@@ -147,6 +144,7 @@ export default {
             };
             this.datas.term = this.datas.list.term[date];
             this.date = year + '年' + month + '月' + day + '日';
+            this.reserveList.date = year + '' + month + '' + day;
 
             // 単位利用時間を１つの要素として、24時間分のタイムテーブルを生成
             // ex. 単位利用時間が1時間 => タイムテーブル内に24個の要素
@@ -422,10 +420,11 @@ div.reserve-paper{
         margin-bottom: 16px;
         width: 100%;
         p{
-            line-height: 32px;
+            line-height: calc(32px + 1vw);
             span{
                 color: $theme-color;
                 font-weight: bold;
+                font-size: calc(12px + 1vw);
             }
         }
         button{
