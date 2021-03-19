@@ -9,7 +9,7 @@
     </div>
 </template>
 
-<style lang="scss">
+<style lang="scss" scoped>
 $font-ja: "Yu Gothic Medium", "游ゴシック Medium", '游ゴシック', "游ゴシック体", 'Yu Gothic', YuGothic, 'メイリオ', 'Meiryo', sans-serif;
 *{
   font-family: $font-ja;

@@ -14,6 +14,7 @@ $theme-color: #060521;
 div.menu{
   position: fixed;
   top: 0;
+  z-index: 1;
   input{
     display: none;
     &:checked + label{

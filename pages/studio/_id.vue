@@ -4,19 +4,19 @@
         <div class="reserve-paper">
             <p class="studio-name">
                 <span>
-                    {{ name }}
+                    {{ datas.name }}
                 </span>
             </p>
-            <p class="studio-description" v-if="!!description">
+            <p class="studio-description" v-if="!!datas.description">
                 <span>
-                    {{ description }}
+                    {{ datas.description }}
                 </span>
             </p>
             <hr noshade>
             <div class="date-selector">
                 <button class="date-prev" @click="reloadTable(-1, null)"></button>
                 <p>
-                    <span>{{ date }}</span>
+                    <span>{{ userView.date }}</span>
                 </p>
                 <button class="date-prev" @click="reloadTable(1, null)"></button>
             </div>
@@ -24,16 +24,14 @@
                 <button class="room"
                 v-for="r in datas.rooms"
                 :key="r.id"
-                :class="r == room ? 'room-active' : null"
+                :class="r == userSelected.room ? 'room-active' : null"
                 @click="reloadTable(null, r)">
                     <span>{{ 'ルーム: ' + r }}</span>
                 </button>
             </div>
-            <hr noshade>
             <div class="usage-viewer">
-                <p class="section-name"><span>利用時間</span></p>
                 <h2>
-                    <span>{{ usage }}</span>
+                    <span>{{ userView.usage }}</span>
                 </h2>
             </div>
             <div class="table">
@@ -62,8 +60,7 @@
                         }}</span>
                     </div>
                 </div>
-                <div class="cell"
-                @click="selected(datas.daylist.length)">
+                <div class="cell">
                     <div class="time">
                         <span>{{
                             Math.floor(datas.term / 60 * datas.close) 
@@ -88,8 +85,12 @@
                     <span>次日</span>
                 </button>
             </div>
+            <p class="description">
+                <span>※予約時間は区切らず、連続させてください</span><br>
+                <span>※複数の時間の同時予約はできません</span>
+            </p>
             <hr noshade>
-            <button class="reserve-button" @click="makeBooking">
+            <button class="reserve-button" :class="allowBooking ? 'reserve-button-active' : null" @click="makeBooking">
                 <span>予約情報を確認する</span>
             </button>
             <Footer/>
@@ -105,64 +106,33 @@ export default {
         Footer
     },
     methods: {
-        makeBooking: function() {
-            const open = this.datas.open;
-            const term = this.datas.term;
-            const booking = this.booking;
-            const hour = function(index) {
-                return Math.floor((index + open)  * term / 60) < 10 ? '0' + Math.floor((index + open)  * term / 60) : Math.floor((index + open)  * term / 60);
-            }
-            const minuite = function(index) {
-                return Math.floor(index * term % 60) == 0 ? '00' : Math.floor(index * term % 60);
-            }
-            const ob = new Object();
-            ob.name = firebase.auth().currentUser.displayName;
-            ob.email = firebase.auth().currentUser.email;
-            ob.start = String(hour(booking[0])) + String(minuite(booking[0]));
-            ob.finish = String(hour(booking[1])) + String(minuite(booking[1]));
-            ob.date = this.date;
-            ob.room = this.room;
-            console.log(ob);
+        // data への値入力のみの関数
+        setDayAndRoom: function(n, room) {
+            if (!!room) this.userSelected.room = room;
+            if (!!n) this.userSelected.skip += n;
+            if (this.userSelected.skip <= 0) this.userSelected.skip = 0;
+            if (this.userSelected.skip >= 7) this.userSelected.skip--;
         },
-        reloadTable: async function(n, room) {
-            if (!!room) this.room = room;
-            if (!!n) this.day += n;
-            if (this.day <= 0) this.day = 0;
-            if (this.day >= 7) this.day--;
+        // 日付&部屋の変更に合わせてtableの中身を変える関数
+        reloadTable: function(n, room) {
+            // 引数をuserSelectに反映
+            this.setDayAndRoom(n, room);
 
-            const now = new Date();
-            const date = (now.getDay() + this.day) % 7;
-            const day = now.getDate() + this.day;
-            const month = (now.getMonth() + 1) < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1;
-            const year = now.getFullYear();
-            const dateTag = String(year) + String(month) + String(day);
-            const timeTable = [];
-            const translateTime = function(term, open) {
-                const h = 60 / term * Number(open.slice(0, 2));
-                const m = Number(open.slice(-2)) / term;
-                return h + m;
-            };
-            this.datas.term = this.datas.list.term[date];
-            this.date = year + '年' + month + '月' + day + '日';
-            this.reserveList.date = year + '' + month + '' + day;
-
-            // 単位利用時間を１つの要素として、24時間分のタイムテーブルを生成
-            // ex. 単位利用時間が1時間 => タイムテーブル内に24個の要素
-            // ex. 単位利用時間が30分 => タイムテーブル内に48個の要素
-            for (let i = 0; i < (60 / this.datas.term * 24); i++) {
-                const ob = new Object();
-                ob.reserve = false;
-                ob.selected = false;
-                timeTable.push(ob);
-            }
+            // ユーザが指定した日時に関する情報を取得
+            const dateData = this.getDate();
+            this.datas.term = this.datas.list.term[dateData.day];
+            // 日付を表すタグを生成 (ex: YYYYMMDD)
+            const dateTag = String(dateData.year) + String(dateData.month) + String(dateData.date);
+            // タイムテーブル生成
+            const timeTable = this.getTimeTable(this.datas.list.term[dateData.day], this.datas.list.open[dateData.day]);
 
             // デフォルト部屋の予約時間を取得 => timeTableに予約状況を反映
             for (let i = 0; i < this.datas.reserved.length; i++) { 
                 // 日付がdateTagと等しくない予約をフィルター
-                if (this.datas.reserved[i].date == dateTag && this.datas.reserved[i].room == this.room) {
+                if (this.datas.reserved[i].date == dateTag && this.datas.reserved[i].room == this.userSelected.room) {
                     // 予約１つの開始時間, 終了時間を単位利用時間を基準に変換
-                    const reserveStart = translateTime(this.datas.term, this.datas.reserved[i].start);
-                    const reserveFinish = translateTime(this.datas.term, this.datas.reserved[i].finish);
+                    const reserveStart = 60 / this.datas.term * this.datas.reserved[i].start;
+                    const reserveFinish = 60 / this.datas.term * this.datas.reserved[i].finish;
                     // 予約の開始時間, 終了時間をindexとしてtimeTableに予約済みの設定
                     for (let i = 0; i < reserveFinish - reserveStart; i++) {
                         timeTable[reserveStart + i].reserve = true;
@@ -171,94 +141,131 @@ export default {
             }
 
             // 開店までの要素（空き時間）をtimeTableから削除
-            for (let i = 0; i < translateTime(this.datas.term, this.datas.list.open[date]); i++) timeTable.shift();
+            for (let i = 0; i < (60 / this.datas.term * this.datas.list.open[dateData.day]); i++) timeTable.shift();
             // 開店までの要素（空き時間）をtimeTableから削除
-            for (let i = 0; i < (60 / this.datas.term * 24 - translateTime(this.datas.term, this.datas.list.close[date])); i++) timeTable.pop();
+            for (let i = 0; i < (60 / this.datas.term * 24 - (60 / this.datas.term * this.datas.list.close[dateData.day])); i++) timeTable.pop();
+            
+            // 画面上で表示される日時を変更
+            this.userView.date = dateData.year + '年' + dateData.month + '月' + dateData.date + '日';
 
-            this.datas.open = translateTime(this.datas.term, this.datas.list.open[date]);
-            this.datas.close = translateTime(this.datas.term, this.datas.list.close[date]);
+            // 曜日<date>を基に店舗情報を更新
+            this.datas.fee = this.datas.list.fee[dateData.day];
+            this.datas.open = 60 / this.datas.term * this.datas.list.open[dateData.day];
+            this.datas.close = 60 / this.datas.term * this.datas.list.close[dateData.day];
             this.datas.daylist = timeTable.concat();
+            // ユーザが画面上で選択した時間帯をリセット
             this.booking.splice(0);
         },
+        // ユーザのタッチイベントによってbookingの中身を変える関数
         selected: function(index) {
-            if ((this.booking.length == 0 || this.booking.length == 2) && index == this.datas.daylist.length) {
-                for (let i = 0; i < this.booking[1] - this.booking[0]; i++) {
-                    this.datas.daylist[this.booking[0] + i].selected = false;
+            if (!this.datas.daylist[index].reserve) { 
+                this.datas.daylist[index].selected = !this.datas.daylist[index].selected;
+                if (this.datas.daylist[index].selected) {
+                    this.booking.push(index);
                 }
-                this.booking.splice(0);
-                return true;
-            }
-
-            // booking[0], booking[1]に値がある場合
-            if (this.booking.length >= 2) {
-                for (let i = 0; i < this.booking[1] - this.booking[0]; i++) {
-                    this.datas.daylist[this.booking[0] + i].selected = false;
+                if (!this.datas.daylist[index].selected) {
+                    this.booking.splice(this.booking.indexOf(index), 1);
                 }
-                this.booking.splice(0);
+                this.booking = Array.from(new Set(this.booking));
+                this.booking.sort(function(a, b) {
+                    return a - b;
+                });
             }
-
-            // booking[0]に開始時間が含まれている場合, booking[1]に終了時間を追加
-            if (this.booking.length == 1 && index > this.booking[0]) {
-                this.booking.push(index);
-                const daylist = this.datas.daylist.concat();
-                const list = daylist.splice(this.booking[0], this.booking[1] - this.booking[0]).map(i => i.reserve).includes(true); 
-                // 開始から終了までの時間に予約済時間が含まれていた場合
-                if (list) {
-                    this.usage = '予約済みの時間は予約できません';
-                    this.datas.daylist[this.booking[0]].selected = false;
-                    this.booking.splice(0);
-                }
-                // 開始から終了までの全時間が空いている場合
-                if (!list) {
-                    for (let i = 0; i < this.booking[1] - this.booking[0]; i++) {
-                        this.datas.daylist[this.booking[0] + i].selected = true;
-                    }
-                }
+        },
+        isIncludeReserved: function() {
+            const reserves = this.datas.daylist.map(i => i.reserve);
+            for (let i = 0; i < this.booking[0]; i++) reserves.shift();
+            for (let i = 0; i < this.datas.daylist.length - this.booking[this.booking.length - 1] - 1; i++) reserves.pop();
+            if (reserves.includes(true)) return true;
+            return false;
+        },
+        isIndexContinuously: function() {
+            const original = this.booking.concat();
+            const copy = this.booking.concat();
+            copy.shift();
+            copy.push(this.booking[this.booking.length - 1] + 1); 
+            for (let i = 0; i < original.length; i++) {
+                if (copy[i] - original[i] > 1) return true;
             }
-
-            // booking[0]に値がなく、クリックしたindexの時間が予約済でない場合
-            if (this.booking.length == 0 && !this.datas.daylist[index].reserve) {
-                this.datas.daylist[index].selected = true;
-                this.booking.push(index);
+            return false;
+        },
+        // 何かしらの値をreturnする関数
+        getTimeTable: function(term) {
+            const timeTable = [];
+            for (let i = 0; i < (60 / term * 24); i++) {
+                const ob = new Object();
+                ob.reserve = false;
+                ob.selected = false;
+                timeTable.push(ob);
             }
+            return timeTable;
+        },
+        getDate: function() {
+            const now = new Date();
+            const day = (now.getDay() + this.userSelected.skip) % 7;
+            const date = now.getDate() + this.userSelected.skip;
+            const month = (now.getMonth() + 1) < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1;
+            const year = now.getFullYear();
+            return { day, date, month, year };
+        },
+        getFactorial: function(n) {
+            if(n <= 1) return 1;
+            return n * this.getFactorial(n - 1);
+        },
+        // 予約確認画面へ進む関数
+        makeBooking: function() {
+            const open = this.datas.open;
+            const term = this.datas.term;
+            const booking = this.booking;
+            const dateData = this.getDate();
+            this.$store.commit('reserve/setReservation', {
+                studioId: this.$route.params.id,
+                name: this.datas.name,
+                fee: this.datas.list.fee[this.getDate().day],
+                term: term,
+                open: open,
+                start: term / 60 * (Number(booking[0]) + Number(open)),
+                finish: term / 60 * (Number(booking[booking.length - 1] + 1) + Number(open)),
+                date: String(dateData.year) + String(dateData.month) + String(dateData.date),
+                room: this.userSelected.room,
+            });
         },
     },
     watch: {
         booking: function(value) {
+            this.allowBooking = true;
             const open = this.datas.open;
             const term = this.datas.term;
-            const hour = function(index) {
-                return Math.floor((index + open) * term / 60);
-            }
-            const minuite = function(index) {
-                return Math.floor(index * term % 60) == 0 ? '00' : Math.floor(index * term % 60);
-            }
-            if (!(value[0] + 1) && !(value[1] + 1)) {
-                this.usage = '再度お選びください';
-            }
+            const hour = (index) => Math.floor((index + open) * term / 60);
+            const minuite = (index) => Math.floor(index * term % 60) == 0 ? '00' : Math.floor(index * term % 60);
             if (!!(value[0] + 1) && !(value[1] + 1)) {
-                this.usage = hour(value[0]) + ':' + minuite(value[0]) + ' ~ ';
+                this.userView.usage = hour(value[0]) + ':' + minuite(value[0]) + ' ~ ';
+                this.allowBooking = false;
             }
-            if (!!(value[1] + 1)) {
-                this.usage = hour(value[0]) + ':' + minuite(value[0]) + ' ~ ' + hour(value[1]) + ':' + minuite(value[1]) + '（' + ((this.booking[1] - this.booking[0]) * this.datas.term) + '分）';
+            if (!!(value[value.length - 1] + 1)) {
+                this.userView.usage = hour(value[0]) + ':' + minuite(value[0]) + ' ~ ' + hour(value[value.length - 1] + 1) + ':' + minuite(value[value.length - 1] + 1) + '（' + ((this.booking[value.length - 1] - this.booking[0] + 1) * this.datas.term) + '分）';
+            }
+            if (this.isIncludeReserved() || this.isIndexContinuously()) {
+                this.userView.usage = '時間を選び直してください';
+                this.allowBooking = false;
             }
         },
     },
     data: function() {
         return {
+            allowBooking: false,
             booking: [],
-            usage: '利用時間をお選びください',
-            day: 0,
-            date: '',
-            room: '',
-            name: '',
-            description: '',
             datas: {
+                name: '',
+                description: '',
+                fee: 0,
+                term: 0,
                 open: 0,
                 close: 0,
                 close: '',
                 cost: 800,
                 list: {
+                    fee: '',
                     term: '',
                     open: '',
                     close: '',
@@ -267,18 +274,25 @@ export default {
                 reserved: [],
                 rooms: [],
             },
-            reserveList: {
-                start: '',
-                finish: '',
-                time: '',
+            userSelected: {
+                skip: 0,
+                room: '',
+            },
+            userView: {
+                usage: '利用時間をお選びください',
                 date: '',
             },
         }
+    },
+    mounted: async function() {
+        await this.reloadTable();
+        this.allowBooking = false;
     },
     asyncData: async function(query) {
         const timeTable = [];
         var openTime = 0;
         var closeTime = 0;
+        var feeList = '';
         var termList = '';
         var openTimeList = '';
         var closeTimeList = '';
@@ -288,26 +302,20 @@ export default {
         let name = '';
         let description = '';
 
-        // 時間を表す文字列からterm基準に変換したindexを出力
-        const translateTime = function(term, open) {
-            const h = 60 / term * Number(open.slice(0, 2));
-            const m = Number(open.slice(-2)) / term;
-            return h + m;
-        };
-
         const now = new Date();
-        const date = now.getDay();
-        const day = now.getDate();
+        const day = now.getDay();
+        const date = now.getDate();
         const month = (now.getMonth() + 1) < 10 ? '0' + (now.getMonth() + 1) : now.getMonth() + 1;
         const year = now.getFullYear();
-        const dateTag = String(year) + String(month) + String(day);
+        const dateTag = String(year) + String(month) + String(date);
 
         // 店舗データを取得, データを元にArray[Object{reserve: Boolean}] 型のタイムテーブルの生成
         await firebase.firestore().collection('studio').doc(query.params.id).get().then(function(shopData) {
             // 単位利用時間, 開店時間, 閉店時間を設定
-            reserveTerm = shopData.data().term[date];
-            openTime = translateTime(reserveTerm, shopData.data().open[date]);
-            closeTime = translateTime(reserveTerm, shopData.data().close[date]);
+            reserveTerm = shopData.data().term[day];
+            openTime = 60 / shopData.data().term[day] * shopData.data().open[day];
+            closeTime = 60 / shopData.data().term[day] * shopData.data().close[day];
+            feeList = shopData.data().fee;
             termList = shopData.data().term;
             openTimeList = shopData.data().open;
             closeTimeList = shopData.data().close;
@@ -334,8 +342,8 @@ export default {
                 // 日付がdateTagと等しくない予約をフィルター
                 if (book.date == dateTag && book.room == rooms[0]) {
                     // 予約１つの開始時間, 終了時間を単位利用時間を基準に変換
-                    const reserveStart = translateTime(reserveTerm, book.start);
-                    const reserveFinish = translateTime(reserveTerm, book.finish);
+                    const reserveStart = 60 / termList[0] * book.start;
+                    const reserveFinish = 60 / termList[0] * book.finish;
                     // 予約の開始時間, 終了時間をindexとしてtimeTableに予約済みの設定
                     for (let i = 0; i < reserveFinish - reserveStart; i++) {
                         timeTable[reserveStart + i].reserve = true;
@@ -349,22 +357,29 @@ export default {
         // 開店までの要素（空き時間）をtimeTableから削除
         for (let i = 0; i < (60 / reserveTerm * 24 - closeTime); i++) timeTable.pop();
         return {
-            name: name,
-            room: rooms[0],
-            date: year + '年' + month + '月' + day + '日',
-            description: description,
             datas: {
+                name: name,
+                description: description,
+                fee: feeList[day],
                 term: reserveTerm,
                 open: openTime,
                 close: closeTime,
                 daylist: timeTable.concat(),
                 reserved: reserved.concat(),
                 list: {
+                    fee: feeList,
                     term: termList,
                     open: openTimeList,
                     close: closeTimeList,
                 },
                 rooms: rooms.concat(),
+            },
+            userSelected: {
+                skip: 0,
+                room: rooms[0],
+            },
+            userView: {
+                date: year + '年' + month + '月' + date + '日',
             },
         }
     }
@@ -389,6 +404,7 @@ div.reserve-paper{
     padding-top: 48px;
     padding-left: 32px;
     padding-right: 16px;
+    border-radius: 80px 0 0 0;
     width: calc(100vw - 48px);
     position: absolute;
     top: 280px;
@@ -416,7 +432,7 @@ div.reserve-paper{
     div.date-selector{
         display: flex;
         justify-content: space-between;
-        margin-top: 32px;
+        margin-top: 64px;
         margin-bottom: 16px;
         width: 100%;
         p{
@@ -486,7 +502,7 @@ div.reserve-paper{
     }
     div.usage-viewer{
         margin-top: 32px;
-        margin-bottom: 32px;
+        margin-bottom: 16px;
         p.section-name{
             margin-bottom: 16px;
             padding-left: 8px;
@@ -508,6 +524,7 @@ div.reserve-paper{
             }
         }
         h2{
+            margin-bottom: 16px;
             text-align: center;
             span{
                 color: $theme-color;
@@ -515,6 +532,7 @@ div.reserve-paper{
         }
     }
     div.table{
+        padding-top: 24px;
         margin-bottom: 24px;
         border: solid 1px #e5e5e5;
         width: 100%;
@@ -563,11 +581,19 @@ div.reserve-paper{
             text-align: center;
         }
     }
+    p.description{
+        margin-bottom: 32px;
+        line-height: 16px;
+        span{
+            color: #2a2a2a;
+            font-size: 12px;
+        }
+    }
     div.date-selector-large{
         display: flex;
         justify-content: space-between;
         margin-top: 32px;
-        margin-bottom: 24px;
+        margin-bottom: 32px;
         width: 100%;
         p{
             line-height: 32px;
@@ -624,14 +650,16 @@ div.reserve-paper{
         }
     }
     button.reserve-button{
-        margin-top: 24px;
-        margin-bottom: 24px;
-        border-radius: 24px;
+        pointer-events: none;
+        margin-top: 32px;
+        margin-bottom: 32px;
+        border-radius: 16px;
         border: solid 1px $theme-color;
         position: relative;
         width: 100%;
         height: 64px;
         background: $theme-color;
+        opacity: 0.4;
         text-align: center;
         line-height: 44px;
         &:focus{outline: none;}
@@ -639,6 +667,10 @@ div.reserve-paper{
             color: #fff;
             font-size: 16px;
             font-weight: bold;
+        }
+        &-active{
+            pointer-events: all;
+            opacity: 1;
         }
     }
 }
