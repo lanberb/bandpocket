@@ -6,10 +6,10 @@
             </p>
         </div>
         <div class="studioList">
-            <div class="studio-card">
+            <div class="studio-card"
+            v-for="(s, index) in studioList"
+            :key="s.id">
                 <nuxt-link 
-                v-for="(s, index) in studioList"
-                :key="s.id"
                 :to="{
                     name: 'studio-id',
                     path: '/studio/:id/',
@@ -62,11 +62,15 @@ export default {
                 list.push(studio);
             });
         }).catch(console.error);
-        // list.map(i => i.thumbnail).forEach(function(key) {
-        //     firebase.storage().ref().child('studio-thumbnails/' + key).getDownloadURL().then(function(res) {
-        //         thumbnails.push(res);
-        //     });
-        // });
+
+        const urls = list.map(i => i.thumbnail);
+        console.log('リスト: ' + urls);
+        for (let i = 0; i < urls.length; i++) {
+            const link = firebase.storage().ref().child('studio-thumbnails/' + urls[i]);
+            await link.getDownloadURL().then(function(res) {
+                thumbnails.push(res);
+            });
+        }
         return {
             studioList: list.concat(),
             thumbnailList: thumbnails.concat(),
@@ -100,16 +104,16 @@ div.head{
 div.studioList{
     width: 100%;
     div.studio-card{
+        display: block;
+        margin-bottom: 24px;
+        padding: 16px;
+        border-radius: 64px 0 64px 0;
+        width: calc(100% - 32px);
+        height: calc(240px - 32px);
+        overflow: hidden;
+        filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
         a{
-            display: block;
-            margin-bottom: 24px;
-            padding: 16px;
-            border-radius: 64px 0 64px 0;
-            width: calc(100% - 32px);
-            height: calc(240px - 32px);
-            overflow: hidden;
             text-decoration: none;
-            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
             img{
                 width: 100%;
                 height: 100%;
