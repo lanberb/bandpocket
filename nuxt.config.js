@@ -52,14 +52,14 @@ export default {
     icon: {
       source: '/favicon_copy.png'
     },
-    name: "Drink!",
-    title: "Drink!",
-    'og:title': 'Drink!',
-    description: 'いつもの一杯をもっとスマートに。生活のひとときをシームレスに。',
-    'og:description': 'いつもの一杯をもっとスマートに。生活のひとときをシームレスに。',
+    name: "BandPocket",
+    title: "BandPocket",
+    'og:title': 'BandPocket',
+    description: 'スタジオ予約をもっとスマートにするアプリ',
+    'og:description': 'スタジオ予約をもっとスマートにするアプリ',
     lang: 'ja',
-    theme_color: "#ff7171",
-    background_color: "#fff",
+    theme_color: "#060521",
+    background_color: "#060521",
     scope: "/",
     start_url: "/"
   },
