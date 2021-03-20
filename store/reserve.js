@@ -21,7 +21,9 @@ export const actions = {
 
     // 店舗の予約コアに追加
     await firebase.firestore().collection('studio').doc(state.studioId).collection('reserveList_core').add({
-      name: state.name,
+      uid: firebase.auth().currentUser.uid,
+      name: firebase.auth().currentUser.displayName,
+      email: firebase.auth().currentUser.email,
       room: state.room,
       date: state.date,
       start: state.start,
