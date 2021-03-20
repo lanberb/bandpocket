@@ -49,9 +49,6 @@ export default {
     '@nuxtjs/dotenv',
   ],
   manifest: {
-    icon: {
-      source: '/favicon_copy.png'
-    },
     name: "BandPocket",
     title: "BandPocket",
     'og:title': 'BandPocket',
