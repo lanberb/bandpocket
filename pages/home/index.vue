@@ -62,18 +62,11 @@ export default {
                 list.push(studio);
             });
         }).catch(console.error);
-
-        const urls = list.map(i => i.thumbnail);
-        for (let i = 0; i < list.length; i++) {
-            if (!!urls[i]) {
-                const url = await firebase.storage().ref().child('studio-thumbnails/' + urls[i]);
-                await url.getDownloadURL().then(function(res) {
-                    thumbnails.push(res);
-                });
-            }
-            if (!urls[i]) thumbnails.push(null);
-        }
-        console.log(thumbnails);
+        // list.map(i => i.thumbnail).forEach(function(key) {
+        //     firebase.storage().ref().child('studio-thumbnails/' + key).getDownloadURL().then(function(res) {
+        //         thumbnails.push(res);
+        //     });
+        // });
         return {
             studioList: list.concat(),
             thumbnailList: thumbnails.concat(),
