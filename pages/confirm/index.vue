@@ -53,7 +53,7 @@
             </div>
         </div>
         <button class="reserve-button" :class="!!number ? 'reserve-button-active' : null" @click="$store.dispatch('reserve/booking')">
-            <span>予約する</span>
+            <span>予約を確定する</span>
         </button>
         <Footer/>
     </section>

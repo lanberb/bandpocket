@@ -45,7 +45,7 @@ div.body{
     transform: translate(-50%, -50%);
     width: calc(100% - 48px);
     text-align: center;
-    h3{
+    h3{ 
         margin-bottom: 32px;
         span{
             font-size: 20px;
