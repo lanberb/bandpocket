@@ -151,6 +151,5 @@ div.studioList{
             }
         }
     }
-    }
 }
 </style>
