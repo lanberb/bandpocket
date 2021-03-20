@@ -7,7 +7,7 @@
         </div>
         <div class="studioList">
             <nuxt-link class="studio-card"
-            v-for="(s, index) in studioList"
+            v-for="s in studioList"
             :key="s.id"
             :to="{
                 name: 'studio-id',
@@ -16,7 +16,9 @@
                     id: s.id,
                 },
             }">
-                <img :src="thumbnailList[index]" alt="studio-img">
+                <div class="image-box">
+                    <img src="~/static/caught-in-joy-ptVBlniJi50-unsplash.jpg" alt="studio-img">
+                </div>
                 <div class="card-favorite">
                     <svg viewBox="0 0 24 24">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#fff" stroke-width="1.6px"/>
@@ -52,7 +54,6 @@ export default {
     asyncData: async function() {
         const db = firebase.firestore();
         var list = [];
-        var thumbnails = [];
         await db.collection('studio').get().then(function(querySnapshot){
             querySnapshot.forEach((doc) => {
                 const studio = doc.data();
@@ -61,17 +62,8 @@ export default {
             });
         }).catch(console.error);
 
-        const urls = list.map(i => i.thumbnail);
-        console.log('リスト: ' + urls);
-        for (let i = 0; i < urls.length; i++) {
-            const link = firebase.storage().ref().child('studio-thumbnails/' + urls[i]);
-            await link.getDownloadURL().then(function(res) {
-                thumbnails.push(res);
-            });
-        }
         return {
             studioList: list.concat(),
-            thumbnailList: thumbnails.concat(),
         }
     },
     mounted: function() {
@@ -101,24 +93,30 @@ div.head{
 }
 div.studioList{
     width: 100%;
-    a{
+    a.studio-card{
         display: inline-block;
         margin-bottom: 24px;
         padding: 16px;
         border-radius: 64px 0 64px 0;
-        width: calc(100% - 32px);
-        height: calc(240px - 32px);
+        width: calc(100vw - 80px);
+        height: 240px;
+        position: relative;
+        background: olivedrab;
         overflow: hidden;
         filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
         text-decoration: none;
-        img{
+        div.image-box{
             width: 100%;
             height: 100%;
             position: absolute;
             top: 0;
             left: 0;
-            object-fit: cover;
             z-index: -1;
+            img{
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
         }
         div.card-favorite{
             border-left: solid 1px #fff;
