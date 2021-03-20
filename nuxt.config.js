@@ -23,7 +23,19 @@ export default {
   plugins: [
     { src: '~/plugins/firebase.js', ssr: false },
   ],
-  
+
+  env: {
+    GUEST_MailAddress: process.env.GUEST_MailAddress || '',
+    GUEST_Password: process.env.GUEST_Password || '',
+    FIREBASE_ApiKey: process.env.FIREBASE_ApiKey || '',
+    FIREBASE_AuthDomain: process.env.FIREBASE_AuthDomain || '',
+    FIREBASE_ProjectID: process.env.FIREBASE_ProjectID || '',
+    FIREBASE_StorageBucket: process.env.FIREBASE_StorageBucket || '',
+    FIREBASE_MessagingSenderID: process.env.FIREBASE_MessagingSenderID || '',
+    FIREBASE_AppID: process.env.FIREBASE_AppID || '',
+    FIREBASE_MeasurementID: process.env.FIREBASE_MeasurementID || '',
+  },
+
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 

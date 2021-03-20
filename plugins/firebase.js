@@ -3,7 +3,7 @@ import 'firebase/auth';
 import 'firebase/firestore';
 if (!firebase.apps.length) {
     firebase.initializeApp({
-        apiKey: 'AIzaSyBEdsRA8YDQqcPhhwmtYRqnzh6jOCY8YPk',
+        apiKey: process.env.FIREBASE_ApiKey,
         authDomain: process.env.FIREBASE_AuthDomain,
         projectId: process.env.FIREBASE_ProjectID,
         storageBucket: process.env.FIREBASE_StorageBucket,
