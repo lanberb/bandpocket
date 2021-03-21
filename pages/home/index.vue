@@ -9,11 +9,6 @@
             <div class="studio-card"
             v-for="(s, index) in studioList"
             :key="s.id">
-                <button class="card-favorite" @click="addFavorite(s.id)">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#fff" stroke-width="1.6px"/>
-                    </svg>
-                </button>
                 <nuxt-link
                 :to="{
                     name: 'studio-id',
@@ -29,6 +24,11 @@
                         <span>{{ s.name }}</span>
                     </p>
                 </nuxt-link>
+                <button class="card-favorite" @click="addFavorite(s.id)">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#fff" stroke-width="1.6px"/>
+                    </svg>
+                </button>
             </div>
         </div>
         <Footer/>
@@ -111,13 +111,43 @@ div.studioList{
     div.studio-card{
         display: inline-block;
         margin-bottom: 24px;
-        padding: 16px;
         border-radius: 64px 0 64px 0;
-        width: calc(100vw - 80px);
+        width: 100%;
         height: 240px;
         position: relative;
         overflow: hidden;
         filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
+        a{
+            padding: 16px;
+            width: calc(100% - 32px);
+            height: calc(100% - 32px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            text-decoration: none;
+            div.image-box{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: -1;
+                img{
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+            p{
+                position: relative;
+                top: 100%;
+                transform: translateY(-100%);
+                span{
+                    color: #fff;
+                    font-weight: bold;
+                }
+            }
+        }
         button.card-favorite{
             border: none;
             border-left: solid 1px #fff;
@@ -147,32 +177,6 @@ div.studioList{
                 left: 50%;
                 transform: translate(-50%, -50%);
                 fill: transparent;
-            }
-        }
-        a{
-            position: relative;
-            text-decoration: none;
-            div.image-box{
-                width: 100%;
-                height: 100%;
-                position: absolute;
-                top: 0;
-                left: 0;
-                z-index: -1;
-                img{
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-            }
-            p{
-                position: relative;
-                top: 100%;
-                transform: translateY(-100%);
-                span{
-                    color: #fff;
-                    font-weight: bold;
-                }
             }
         }
     }
