@@ -1,13 +1,49 @@
 <template>
   <div class="menu">
     <input type="checkbox" id="menu-checkbox">
-    <label for="menu-checkbox">
+    <label for="menu-checkbox" @click="getUserData">
+      <div class="body">
+        <div class="user">
+          <p>
+            <span>{{ name }}</span>
+          </p>
+          <p>
+            <span>{{ email }}</span>
+          </p>
+        </div>
+        <div class="links">
+          <nuxt-link to="/home">
+            <span>Home / ホームへ戻る</span>
+          </nuxt-link>
+          <nuxt-link to="/">
+            <span>SignOut / サインアウト</span>
+          </nuxt-link>
+        </div>
+      </div>
       <div class="hamburger">
         <div class="crescenet"></div>
       </div>
     </label>
   </div>
 </template>
+
+<script>
+import firebase from '~/plugins/firebase.js';
+export default {
+  data: function() {
+    return {
+      name: null,
+      email: null,
+    }
+  },
+  methods: {
+    getUserData: function() {
+      this.name = !!firebase.auth().currentUser ? firebase.auth().currentUser.displayName : null;
+      this.email = !!firebase.auth().currentUser ? firebase.auth().currentUser.email : null;
+    },
+  },
+}
+</script>
 
 <style lang="scss" scoped>
 $theme-color: #060521;
@@ -20,6 +56,9 @@ div.menu{
     &:checked + label{
       width: 80vw;
       overflow: visible;
+      div.body{
+        opacity: 1;
+      }
       div.hamburger{
         background: $theme-color;
         &::before, &::after{
@@ -42,15 +81,47 @@ div.menu{
     height: calc(100vh - 20px);
     background: $theme-color;
     filter: drop-shadow( 0 4px 4px rgba(0, 0, 0, 0.2));
-    // &::before{
-    //   content: '';
-    //   width: 100vw;
-    //   height: 100vh;
-    //   position: absolute;
-    //   top: 0;
-    //   background: tomato;
-    //   z-index: -1;
-    // }
+    div.body{
+      transition: 250ms;
+      padding-left: 24px;
+      padding-right: 24px;
+      padding-bottom: 32px;
+      width: calc(100% - 40px);
+      height: 100%;
+      position: absolute;
+      opacity: 0;
+      div{
+        margin-top: 16px;
+        width: 100%;
+        position: relative;
+        white-space: nowrap;
+        span{
+          color: #fff;
+        }
+      }
+      div.user{
+        border-bottom: solid 1px #e5e5e5;
+        height: 64px;
+        p{
+          &:first-child{
+            span{
+              font-weight: bold;
+            }
+          }
+        }
+      }
+      div.links{
+        a{
+          display: block;
+          height: 80px;
+          text-decoration: none;
+          line-height: 80px;
+          span{
+            font-weight: bold;
+          }
+        }
+      }
+    }
     div.hamburger{
       transition: 250ms;
       border-radius: 0 16px 16px 0;
