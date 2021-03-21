@@ -1,6 +1,6 @@
 <template>
     <section>
-        <img src="~/static/caught-in-joy-ptVBlniJi50-unsplash.jpg" alt="studio-img">
+        <img :src="thumbnail" alt="studio-img">
         <div class="reserve-paper">
             <p class="studio-name">
                 <span>
@@ -249,10 +249,13 @@ export default {
                 this.userView.usage = '時間を選び直してください';
                 this.allowBooking = false;
             }
+            if (value.length == 0) this.allowBooking = false;
+            console.log(value)
         },
     },
     data: function() {
         return {
+            thumbnail: '',
             allowBooking: false,
             booking: [],
             datas: {
@@ -285,22 +288,32 @@ export default {
         }
     },
     mounted: async function() {
+        if (!(!!firebase.auth().currentUser)) this.$router.push('/');
+        // サムネイルのリンクを取得
+        let uri = '';
+        await firebase.storage().ref().child('studio-thumbnails/' + this.thumbnail).getDownloadURL().then(function(res) {
+            uri = res;
+        }).catch(function(error) {
+            uri = null;
+        });
         await this.reloadTable();
+        this.thumbnail = uri;
         this.allowBooking = false;
     },
     asyncData: async function(query) {
         const timeTable = [];
-        var openTime = 0;
-        var closeTime = 0;
-        var feeList = '';
-        var termList = '';
-        var openTimeList = '';
-        var closeTimeList = '';
-        var reserveTerm = '';
+        let openTime = 0;
+        let closeTime = 0;
+        let feeList = '';
+        let termList = '';
+        let openTimeList = '';
+        let closeTimeList = '';
+        let reserveTerm = '';
         const reserved = [];
         let rooms = '';
         let name = '';
         let description = '';
+        let thumbnail = '';
 
         const now = new Date();
         const day = now.getDay();
@@ -322,6 +335,7 @@ export default {
             rooms = shopData.data().rooms;
             name = shopData.data().name;
             description = shopData.data().description;
+            thumbnail = shopData.data().thumbnail;
 
             // 単位利用時間を１つの要素として、24時間分のタイムテーブルを生成
             // ex. 単位利用時間が1時間 => タイムテーブル内に24個の要素
@@ -357,6 +371,7 @@ export default {
         // 開店までの要素（空き時間）をtimeTableから削除
         for (let i = 0; i < (60 / reserveTerm * 24 - closeTime); i++) timeTable.pop();
         return {
+            thumbnail: thumbnail,
             datas: {
                 name: name,
                 description: description,

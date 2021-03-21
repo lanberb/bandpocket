@@ -6,28 +6,30 @@
             </p>
         </div>
         <div class="studioList">
-            <nuxt-link class="studio-card"
-            v-for="s in studioList"
-            :key="s.id"
-            :to="{
-                name: 'studio-id',
-                path: '/studio/:id/',
-                params: {
-                    id: s.id,
-                },
-            }">
-                <div class="image-box">
-                    <img src="~/static/caught-in-joy-ptVBlniJi50-unsplash.jpg" alt="studio-img">
-                </div>
-                <div class="card-favorite">
+            <div class="studio-card"
+            v-for="(s, index) in studioList"
+            :key="s.id">
+                <nuxt-link
+                :to="{
+                    name: 'studio-id',
+                    path: '/studio/:id/',
+                    params: {
+                        id: s.id,
+                    },
+                }">
+                    <div class="image-box">
+                        <img :src="images[index]" alt="studio-img">
+                    </div>
+                    <p class="card-title">
+                        <span>{{ s.name }}</span>
+                    </p>
+                </nuxt-link>
+                <button class="card-favorite" @click="addFavorite(s.id)">
                     <svg viewBox="0 0 24 24">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" stroke="#fff" stroke-width="1.6px"/>
                     </svg>
-                </div>
-                <p class="card-title">
-                    <span>{{ s.name }}</span>
-                </p>
-            </nuxt-link>
+                </button>
+            </div>
         </div>
         <Footer/>
     </section>
@@ -41,19 +43,23 @@ export default {
         Footer
     },
     methods: {
+        addFavorite: function(id) {
+            console.log(id);
+        },
     },
     watch: {
     },
     data: function() {
         return {
             studioList: '',
-            thumbnailList: '',
             url: '',
+            images: [],
         }
     },
     asyncData: async function() {
         const db = firebase.firestore();
-        var list = [];
+        const list = [];
+        const images = [];
         await db.collection('studio').get().then(function(querySnapshot){
             querySnapshot.forEach((doc) => {
                 const studio = doc.data();
@@ -66,9 +72,18 @@ export default {
             studioList: list.concat(),
         }
     },
-    mounted: function() {
+    mounted: async function() {
         if (!(!!firebase.auth().currentUser)) this.$router.push('/');
-        console.log(this.url)
+        const images = [];
+        const router = this.$router;
+        for (let i = 0; i < this.studioList.map(i => i.thumbnail).length; i++) {
+            await firebase.storage().ref().child('studio-thumbnails/' + this.studioList.map(i => i.thumbnail)[i]).getDownloadURL().then(function(res) {
+                images.push(res)
+            }).catch(function(error) {
+                router.push('/');
+            });
+        }
+        this.images = images.concat();
     },
 }
 </script>
@@ -93,7 +108,7 @@ div.head{
 }
 div.studioList{
     width: 100%;
-    a.studio-card{
+    div.studio-card{
         display: inline-block;
         margin-bottom: 24px;
         padding: 16px;
@@ -101,24 +116,35 @@ div.studioList{
         width: calc(100vw - 80px);
         height: 240px;
         position: relative;
-        background: olivedrab;
         overflow: hidden;
         filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
-        text-decoration: none;
-        div.image-box{
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            img{
+        a{
+            text-decoration: none;
+            div.image-box{
                 width: 100%;
                 height: 100%;
-                object-fit: cover;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: -1;
+                img{
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+            p{
+                position: relative;
+                top: 100%;
+                transform: translateY(-100%);
+                span{
+                    color: #fff;
+                    font-weight: bold;
+                }
             }
         }
-        div.card-favorite{
+        button.card-favorite{
+            border: none;
             border-left: solid 1px #fff;
             border-bottom: solid 1px #fff;
             border-radius: 0 0 0 32px;
@@ -128,6 +154,15 @@ div.studioList{
             top: 0;
             left: 100%;
             transform: translateX(calc(-100%));
+            background: transparent;
+            z-index: 2;
+            &:focus{outline: none;}
+            &-active{
+                background: #FF6464;
+                svg{
+                    fill: #fff;
+                }
+            }
             svg{
                 width: 20px;
                 height: 20px;
@@ -137,15 +172,6 @@ div.studioList{
                 left: 50%;
                 transform: translate(-50%, -50%);
                 fill: transparent;
-            }
-        }
-        p{
-            position: relative;
-            top: 100%;
-            transform: translateY(-100%);
-            span{
-                color: #fff;
-                font-weight: bold;
             }
         }
     }
