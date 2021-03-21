@@ -250,7 +250,6 @@ export default {
                 this.allowBooking = false;
             }
             if (value.length == 0) this.allowBooking = false;
-            console.log(value)
         },
     },
     data: function() {
