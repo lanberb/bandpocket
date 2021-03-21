@@ -101,9 +101,9 @@ export default {
                 password: process.env.GUEST_Password,
             },
             state: '',
-            email: 'lanberb.1@gmail.com',
-            password: 'note10969',
-            name: '佐々木尚',
+            email: '',
+            password: '',
+            name: '',
         }
     },
     mounted: function(){
