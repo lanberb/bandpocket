@@ -35,7 +35,7 @@
           <p class="description">
               <span>Email / メールアドレス</span>
           </p>
-          <input type="email" v-model="email" placeholder="sample@drink.jp">
+          <input type="email" v-model="email" placeholder="sample@drink.jp" autocomplete="email">
           <p class="description">
               <span>Password / パスワード</span>
           </p>
@@ -56,7 +56,7 @@
           <p class="description">
               <span>Email / メールアドレス</span>
           </p>
-          <input type="email" v-model="email" placeholder="XXX@XXX.jp">
+          <input type="email" v-model="email" placeholder="XXX@XXX.jp" autocomplete="email">
           <p class="description">
               <span>Password / パスワード</span>
           </p>
