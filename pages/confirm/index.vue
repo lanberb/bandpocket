@@ -7,7 +7,7 @@
         </div>
         <div class="data-viewer">
             <p class="data-section">
-                <span>お客様情報</span>
+                <span>店舗情報</span>
             </p>
             <div class="user-name">
                 <p class="label">

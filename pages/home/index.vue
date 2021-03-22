@@ -64,7 +64,12 @@ export default {
             querySnapshot.forEach((doc) => {
                 const studio = doc.data();
                 studio.id = doc.id;
-                list.push(studio);
+                if (!!studio.restrict && firebase.auth().currentUser.email.includes(studio.restrict)) {
+                    list.push(studio);
+                }
+                if (!studio.restrict) {
+                    list.push(studio);
+                }
             });
         }).catch(console.error);
 

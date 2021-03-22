@@ -54,7 +54,7 @@
       <div class="view-signin"
       v-if="state == 'signin'">
           <p class="description">
-              <span>Name / 氏名</span>
+              <span>Email / メールアドレス</span>
           </p>
           <input type="email" v-model="email" placeholder="XXX@XXX.jp">
           <p class="description">
