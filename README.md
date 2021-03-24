@@ -1,5 +1,5 @@
 # Bandpocket 
-リンクはこちら [https://limitless-meadow-74184.herokuapp.com/](https://limitless-meadow-74184.herokuapp.com/)
+リンクはこちら [https://bandpocket.herokuapp.com/](https://bandpocket.herokuapp.com/)
 
 ## 概要
 #### 【コンセプト】スタジオ予約をもっと簡単にする🎸
