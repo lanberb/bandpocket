@@ -55,9 +55,9 @@ div.menu{
     display: none;
     &:checked + label{
       width: 80vw;
-      overflow: visible;
       div.body{
         opacity: 1;
+        pointer-events: all;
       }
       div.hamburger{
         background: $theme-color;
@@ -90,6 +90,7 @@ div.menu{
       height: 100%;
       position: absolute;
       opacity: 0;
+      pointer-events: none;
       div{
         margin-top: 16px;
         width: 100%;
