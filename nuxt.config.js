@@ -68,7 +68,7 @@ export default {
         'Comfortaa',
       ],
       urls: [
-        "https://fonts.googleapis.com/css2?family=Comfortaa:wght@300&display=swap&text=BandPocket",
+        "https://fonts.googleapis.com/css2?family=Comfortaa:wght@300&display=swap&text=Bandpocket",
       ]
     }
   },

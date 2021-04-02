@@ -8,7 +8,7 @@
           </div>
           <h1 class="app-title" 
           v-if="state == ''">
-              <span>BandPocket</span>
+              <span>Bandpocket</span>
           </h1>
           <button class="signUp" @click="state = 'signup'">
               <p>
@@ -114,6 +114,7 @@ export default {
 
 <style lang="scss" scoped>
 $theme-color: #060521;
+$theme-gradient: linear-gradient(0.25turn, #7A94FF, #A55DF1);
 div.controller{
     padding-left: 8px;
     width: 100vw;
@@ -122,7 +123,7 @@ div.controller{
     top: 0;
     left: 0;
     z-index: 1;
-    background: $theme-color;
+    background: $theme-gradient;
     button{
         margin-bottom: 16px;
         padding: 0;
@@ -169,7 +170,7 @@ div.controller{
         background: transparent;
         filter: none;
         p{
-            text-decoration: underline;
+            text-decoration: none;
             line-height: 48px;
             span{
                 color: #fff;
@@ -185,16 +186,21 @@ div.controller{
         left: 50%;
         transform: translate(-50%, -50%);
         div.icon-box{
-          width: 240px;
-          height: 240px;
-          position: relative;
-          left: 50%;
-          transform: translateX(-50%);
-          img{
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
+            border-radius: 50%;
+            width: 280px;
+            height: 280px;
+            position: relative;
+            left: 50%;
+            background: $theme-color;
+            transform: translateX(-50%);
+            filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2));
+            img{
+                padding-top: 8px;
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                transform: scale(0.6);
+            }
         }
         h1{
             margin-top: 48px;

@@ -402,6 +402,7 @@ export default {
 
 <style lang="scss" scoped>
 $theme-color: #060521;
+$theme-gradient: linear-gradient(0.25turn, #7A94FF, #A55DF1);
 img{
     width: 100vw;
     height: 100vw;
@@ -503,7 +504,8 @@ div.reserve-paper{
             line-height: 0;
             &:focus{outline: none;}
             &.room-active{
-                background: $theme-color;
+                border: none;
+                background: $theme-gradient;
                 span{
                     color: #fff;
                 }
@@ -668,11 +670,11 @@ div.reserve-paper{
         margin-top: 32px;
         margin-bottom: 32px;
         border-radius: 16px;
-        border: solid 1px $theme-color;
+        border: none;
         position: relative;
         width: 100%;
         height: 64px;
-        background: $theme-color;
+        background: $theme-gradient;
         opacity: 0.4;
         text-align: center;
         line-height: 44px;

@@ -47,6 +47,7 @@ export default {
 
 <style lang="scss" scoped>
 $theme-color: #060521;
+$theme-gradient: linear-gradient(0.25turn, #7A94FF, #A55DF1);
 div.menu{
   position: fixed;
   top: 0;
